@@ -1,0 +1,16 @@
+# Pull in main requirements
+-r requirements.txt
+
+# Direct Dependencies
+mysqlclient==2.0.3
+pytest==6.2.5
+
+# Secondary Dependencies
+atomicwrites==1.4.0
+attrs==21.2.0
+iniconfig==1.1.1
+packaging==21.0
+pluggy==1.0.0
+py==1.10.0
+pyparsing==2.4.7
+toml==0.10.2

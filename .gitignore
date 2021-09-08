@@ -1,0 +1,10 @@
+venv**
+*pyc
+*swp
+**.DS_Store
+**egg-info**
+.vscode
+*.sqlite3
+
+# Environment File
+.env
