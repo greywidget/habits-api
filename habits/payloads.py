@@ -18,7 +18,7 @@ HELP = {
         "Automate your habits. Invest in technology and onetime purchases that lock in future behaviour",
     ],
     "reward": [
-        "Use reinforcement. Give yourself and immediate reward when you complete your habit",
+        "Use reinforcement. Give yourself an immediate reward when you complete your habit",
         "Make [doing nothing] enjoyable. When avoiding a bad habit, design a way to see the benefits",
         "Use a habit tracker. Keep track of your habit streak and don't break the chain",
         "Never miss twice. When you forget to do a habit, make sure you get back on track immediately",
