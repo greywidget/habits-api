@@ -9,6 +9,7 @@ from .models import (
     HabitCreate,
     HabitRead,
 )
+from .payloads import HELP
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlmodel import Session, select
@@ -117,3 +118,8 @@ def delete_habit(*, session: Session = Depends(get_session), habit_id: int):
     session.delete(habit)
     session.commit()
     return {"ok": True}
+
+
+@app.get("/help/")
+def help():
+    return HELP
