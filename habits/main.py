@@ -1,4 +1,3 @@
-from json.encoder import py_encode_basestring_ascii
 from typing import Optional
 
 from .db import create_db_and_tables, engine
@@ -12,7 +11,7 @@ from .models import (
 )
 
 from fastapi import Depends, FastAPI, HTTPException, Query
-from sqlmodel import Session, default, select
+from sqlmodel import Session, select
 
 app = FastAPI()
 
@@ -41,7 +40,7 @@ def read_users(
     *,
     session: Session = Depends(get_session),
     offset: int = 0,
-    limit: int = Query(default=100, le=100)
+    limit: int = Query(default=100, le=100),
 ):
     users = session.exec(select(User).offset(offset).limit(limit)).all()
     return users
@@ -86,7 +85,7 @@ def read_habits(
     offset: int = 0,
     limit: int = Query(default=100, le=100),
     user_id: Optional[int] = None,
-    contains: Optional[str] = None
+    contains: Optional[str] = None,
 ):
     sel = select(Habit)
     if user_id:
@@ -96,11 +95,9 @@ def read_habits(
         sel = sel.where(Habit.user_id == user_id)
 
     if contains:
-        pass
+        sel = sel.where(Habit.text.ilike(f"%{contains.lower()}%"))
 
     habits = session.exec(sel.offset(offset).limit(limit)).all()
-    if user_id:
-        print(user_id)
     return habits
 
 
