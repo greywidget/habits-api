@@ -8,7 +8,7 @@ def test_create_user(client: TestClient):
     response = client.post("/users/", json={"name": "craig", "handle": "greywidget"})
     data = response.json()
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert data["name"] == "craig"
     assert data["handle"] == "greywidget"
     assert data["id"] is not None

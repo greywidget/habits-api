@@ -11,7 +11,7 @@ def test_create_habit(client: TestClient, user_1: User):
     )
     data = response.json()
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert data["text"] == "Read quality Python Code"
     assert data["user_id"] == 1
     assert data["id"] is not None
@@ -61,7 +61,7 @@ def test_read_all_habits(
         + [habit.text for habit in user_2_with_habits.habits]
     )
 
-    response = client.get(f"/habits/")
+    response = client.get("/habits/")
     data = response.json()
     assert response.status_code == 200
     assert len(data) == len(user_1_with_habits.habits) + len(user_2_with_habits.habits)
@@ -75,10 +75,9 @@ def test_read_habits_for_user(
     user1_habits = sorted([habit.text for habit in user_1_with_habits.habits])
     user2_habits = [habit.text for habit in user_2_with_habits.habits]
 
-    response = client.get(f"/habits/")
+    response = client.get("/habits/")
     data = response.json()
     assert response.status_code == 200
-    assert len(data) == len(user1_habits) + len(user2_habits)
 
     response = client.get(f"/habits/?user_id={user_1_with_habits.id}")
     data = response.json()
