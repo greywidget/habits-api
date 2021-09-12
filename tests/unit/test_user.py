@@ -55,9 +55,21 @@ def test_read_user(client: TestClient, user_1: User):
     assert data["id"] == user_1.id
 
 
+def test_read_bad_user(client: TestClient):
+    response = client.get("/users/99")
+    data = response.json()
+    assert response.status_code == 404
+
+
 def test_delete_user(session: Session, client: TestClient, user_1: User):
     response = client.delete(f"/users/{user_1.id}")
     user_in_db = session.get(User, user_1.id)
 
     assert response.status_code == 200
     assert user_in_db is None
+
+
+def test_delete_bad_user(client: TestClient):
+    response = client.delete(f"/users/99")
+    data = response.json()
+    assert response.status_code == 404

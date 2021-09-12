@@ -53,6 +53,12 @@ def test_read_habit(client: TestClient, user_1_with_habits: User):
     assert data["text"] == habit.text
 
 
+def test_read_bad_habit(client: TestClient):
+    response = client.get("/habits/99")
+    data = response.json()
+    assert response.status_code == 404
+
+
 def test_read_all_habits(
     client: TestClient, user_1_with_habits: User, user_2_with_habits: User
 ):
@@ -73,7 +79,6 @@ def test_read_habits_for_user(
     client: TestClient, user_1_with_habits: User, user_2_with_habits: User
 ):
     user1_habits = sorted([habit.text for habit in user_1_with_habits.habits])
-    user2_habits = [habit.text for habit in user_2_with_habits.habits]
 
     response = client.get("/habits/")
     data = response.json()
@@ -84,6 +89,14 @@ def test_read_habits_for_user(
     assert response.status_code == 200
     retrieved_habits = sorted(item["text"] for item in data)
     assert user1_habits == retrieved_habits
+
+
+def test_read_habits_for_bad_user(
+    client: TestClient, user_1_with_habits: User, user_2_with_habits: User
+):
+    response = client.get("/habits/?user_id=99")
+    data = response.json()
+    assert response.status_code == 404
 
 
 def test_read_habits_for_keyword(
@@ -143,3 +156,9 @@ def test_delete_user_deletes_assoc_habits(client: TestClient, user_1: User):
     response = client.get("/habits/")
     data = response.json()
     assert len(data) == 0
+
+
+def test_delete_bad_habit(client: TestClient):
+    response = client.delete("/habits/99")
+    data = response.json()
+    assert response.status_code == 404
