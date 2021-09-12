@@ -162,3 +162,11 @@ def test_delete_bad_habit(client: TestClient):
     response = client.delete("/habits/99")
     data = response.json()
     assert response.status_code == 404
+
+
+def test_read_too_many_habits(client: TestClient):
+    response = client.get("/habits/?limit=101")
+    data = response.json()
+    assert response.status_code == 422
+    assert data["detail"][0]["loc"] == ["query", "limit"]
+    data["detail"][0]["msg"] == "ensure this value is less than or equal to 100"
