@@ -5,7 +5,7 @@ from habits.payloads import HELP
 
 
 def test_read_help(session: Session, client: TestClient):
-    response = client.get(f"/help/")
+    response = client.get("/help/")
     data = response.json()
 
     assert response.status_code == 200

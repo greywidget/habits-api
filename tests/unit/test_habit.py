@@ -11,7 +11,7 @@ def test_create_habit(client: TestClient, user_1: User):
     )
     data = response.json()
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert data["text"] == "Read quality Python Code"
     assert data["user_id"] == 1
     assert data["id"] is not None
@@ -53,6 +53,12 @@ def test_read_habit(client: TestClient, user_1_with_habits: User):
     assert data["text"] == habit.text
 
 
+def test_read_bad_habit(client: TestClient):
+    response = client.get("/habits/99")
+    data = response.json()
+    assert response.status_code == 404
+
+
 def test_read_all_habits(
     client: TestClient, user_1_with_habits: User, user_2_with_habits: User
 ):
@@ -61,7 +67,7 @@ def test_read_all_habits(
         + [habit.text for habit in user_2_with_habits.habits]
     )
 
-    response = client.get(f"/habits/")
+    response = client.get("/habits/")
     data = response.json()
     assert response.status_code == 200
     assert len(data) == len(user_1_with_habits.habits) + len(user_2_with_habits.habits)
@@ -73,18 +79,24 @@ def test_read_habits_for_user(
     client: TestClient, user_1_with_habits: User, user_2_with_habits: User
 ):
     user1_habits = sorted([habit.text for habit in user_1_with_habits.habits])
-    user2_habits = [habit.text for habit in user_2_with_habits.habits]
 
-    response = client.get(f"/habits/")
+    response = client.get("/habits/")
     data = response.json()
     assert response.status_code == 200
-    assert len(data) == len(user1_habits) + len(user2_habits)
 
     response = client.get(f"/habits/?user_id={user_1_with_habits.id}")
     data = response.json()
     assert response.status_code == 200
     retrieved_habits = sorted(item["text"] for item in data)
     assert user1_habits == retrieved_habits
+
+
+def test_read_habits_for_bad_user(
+    client: TestClient, user_1_with_habits: User, user_2_with_habits: User
+):
+    response = client.get("/habits/?user_id=99")
+    data = response.json()
+    assert response.status_code == 404
 
 
 def test_read_habits_for_keyword(
@@ -144,3 +156,17 @@ def test_delete_user_deletes_assoc_habits(client: TestClient, user_1: User):
     response = client.get("/habits/")
     data = response.json()
     assert len(data) == 0
+
+
+def test_delete_bad_habit(client: TestClient):
+    response = client.delete("/habits/99")
+    data = response.json()
+    assert response.status_code == 404
+
+
+def test_read_too_many_habits(client: TestClient):
+    response = client.get("/habits/?limit=101")
+    data = response.json()
+    assert response.status_code == 422
+    assert data["detail"][0]["loc"] == ["query", "limit"]
+    data["detail"][0]["msg"] == "ensure this value is less than or equal to 100"

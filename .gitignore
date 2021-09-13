@@ -1,8 +1,12 @@
+htmlcov/
 venv**
 *pyc
 *swp
 **.DS_Store
 **egg-info**
+.coverage
+.mypy_cache
+.pytest_cache
 .vscode
 *.sqlite3
 
