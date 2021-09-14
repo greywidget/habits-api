@@ -7,12 +7,12 @@ from habits.models import Habit, User
 def test_create_habit(client: TestClient, user_1: User):
     response = client.post(
         "/habits/",
-        json={"text": "Read quality Python Code", "user_id": user_1.id},
+        json={"text": "Read quality Python code", "user_id": user_1.id},
     )
     data = response.json()
 
     assert response.status_code == 201
-    assert data["text"] == "Read quality Python Code"
+    assert data["text"] == "Read quality Python code"
     assert data["user_id"] == 1
     assert data["id"] is not None
 
@@ -20,12 +20,41 @@ def test_create_habit(client: TestClient, user_1: User):
 def test_create_habit_bad_user(client: TestClient):
     response = client.post(
         "/habits/",
-        json={"text": "Read quality Python Code", "user_id": 0},
+        json={"text": "Read quality Python code", "user_id": 0},
     )
     data = response.json()
 
     assert response.status_code == 400
     assert data["detail"] == "Not a valid user id"
+
+
+def test_create_habit_duplicate_same_user(client: TestClient, user_1_with_habits: User):
+    response = client.post(
+        "/habits/",
+        json={
+            "text": "Read quality Python code",
+            "user_id": f"{user_1_with_habits.id}",
+        },
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == f"Habit already exists for this user id"
+
+
+def test_create_habit_duplicate_different_user(
+    client: TestClient, user_1_with_habits: User, user_2_with_habits: User
+):
+    response = client.post(
+        "/habits/",
+        json={
+            "text": "Read quality Python code",
+            "user_id": f"{user_2_with_habits.id}",
+        },
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["text"] == "Read quality Python code"
+    assert data["user_id"] == user_2_with_habits.id
+    assert data["id"] is not None
 
 
 def test_delete_habit(session: Session, client: TestClient, user_1: User):
@@ -138,7 +167,7 @@ def test_read_habits_for_user_and_keyword(
 
 def test_delete_user_deletes_assoc_habits(client: TestClient, user_1: User):
     habits = (
-        "Read Quality Python Code",
+        "Read Quality Python code",
         "Pogo for 5 minutes",
         "No sticky buns",
     )
