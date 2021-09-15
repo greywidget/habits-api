@@ -15,7 +15,7 @@ def test_create_user(client: TestClient):
 
 
 def test_create_user_incomplete(client: TestClient):
-    # No hande
+    # No handle
     response = client.post("/users/", json={"name": "craig"})
     assert response.status_code == 422
 
@@ -24,6 +24,12 @@ def test_create_user_invalid(client: TestClient):
     # handle has an invalid type
     response = client.post("/users/", json={"name": "craig", "moose": []})
     assert response.status_code == 422
+
+
+def test_create_user_duplicate(client: TestClient, user_1: User):
+    response = client.post("/users/", json={"name": "grey", "handle": "greywidget"})
+    assert response.status_code == 400
+    assert response.json()["detail"] == "User already exists"
 
 
 def test_read_users(session: Session, client: TestClient, user_1: User):

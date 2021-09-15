@@ -4,7 +4,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query, status
 from sqlalchemy.sql.operators import ilike_op
 from sqlmodel import Session, select
 
-from .db import create_db_and_tables, engine
+from .db import create_db_and_tables, get_session
 from .models import Habit, HabitCreate, HabitRead, User, UserCreate, UserRead
 from .payloads import HELP
 
@@ -16,13 +16,13 @@ def on_startup():
     create_db_and_tables()
 
 
-def get_session():
-    with Session(engine) as session:
-        yield session
-
-
 @app.post("/users/", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def create_user(*, session: Session = Depends(get_session), user: UserCreate):
+    query = select(User).where(User.handle == user.handle)
+    existing_user = session.exec(query).first()
+    if existing_user is not None:
+        raise HTTPException(status_code=400, detail="User already exists")
+
     db_user = User.from_orm(user)
     session.add(db_user)
     session.commit()
@@ -66,11 +66,18 @@ def delete_user(*, session: Session = Depends(get_session), user_id: int):
 @app.post("/habits/", response_model=HabitRead, status_code=status.HTTP_201_CREATED)
 def create_habit(*, session: Session = Depends(get_session), habit: HabitCreate):
     db_habit = Habit.from_orm(habit)
-
     user = session.get(User, habit.user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Not a valid user id"
+        )
+
+    query = select(Habit).where(Habit.user_id == habit.user_id)
+    query = query.where(Habit.text == habit.text)
+    existing_habit = session.exec(query).first()
+    if existing_habit is not None:
+        raise HTTPException(
+            status_code=400, detail="Habit already exists for this user id"
         )
 
     session.add(db_habit)
